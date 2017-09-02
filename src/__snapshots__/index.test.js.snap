@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`removing fields from query that aren't in schema 1`] = `
+"query RandomQuery {
+  this {
+    is
+    a
+  }
+  random
+  thing
+}
+"
+`;
