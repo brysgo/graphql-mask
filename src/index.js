@@ -13,7 +13,10 @@ module.exports = function graphqlMask(schema, query) {
           const parentType = typeInfo.getParentType();
           const type = typeInfo.getType();
           const inputType = typeInfo.getInputType();
-          if (node.kind === "Field" && !(type || inputType)) {
+          if (
+            (node.kind === "Field" && !type) ||
+            (node.kind === "Argument" && !inputType)
+          ) {
             return null;
           }
         },
