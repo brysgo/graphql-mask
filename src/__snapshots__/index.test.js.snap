@@ -1,5 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`passing a string schema instead of a parsed one 1`] = `
+"query RandomQuery {
+  two
+}
+"
+`;
+
 exports[`removing arguments that don't exist in schema 1`] = `
 "query RandomQuery {
   something(bar: 4)

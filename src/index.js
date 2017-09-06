@@ -1,10 +1,12 @@
 // @flow
 
 const { parse, visit, visitWithTypeInfo, print } = require("graphql/language");
-const { TypeInfo } = require("graphql/utilities");
+const { TypeInfo, buildASTSchema } = require("graphql/utilities");
 
 module.exports = function graphqlMask(schema, query) {
-  const typeInfo = new TypeInfo(schema);
+  const astSchema =
+    typeof schema === "string" ? buildASTSchema(parse(schema)) : schema;
+  const typeInfo = new TypeInfo(astSchema);
   return print(
     visit(
       parse(query),

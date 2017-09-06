@@ -8,6 +8,41 @@
 
 Graphql Mask is a simple utility for removing everything in a query that is not defined in a schema. Use it the same way you would use the library function for `graphql-js` e.g. `graphqlMask(schema, query)` but instead of getting back results, you will get back a trimmed down query.
 
+## Usage
+
+```bash
+$ npm install graphql-mask
+# or 
+$ yarn add graphql-mask
+```
+
+```
+const graphqlMask = require("graphql-mask");
+
+const result = graphqlMask(`
+  type Query {
+    something: String!
+    somethingElse: Int
+  }
+`,`
+  query ExampleQuery {
+    something
+    somethingElse
+    somethingNotInSchema
+  }
+`)
+
+console.log(result)
+```
+
+This will print...
+```graphql
+query ExampleQuery {
+  something
+  somethingElse
+}
+```
+
 [build-badge]: https://circleci.com/gh/brysgo/graphql-mask.svg?style=shield
 
 [build]: 

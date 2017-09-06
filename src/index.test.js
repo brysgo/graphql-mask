@@ -20,7 +20,7 @@ test("removing fields from query that aren't in schema", () => {
     `)
   );
 
-  const editedAst = graphqlMask(
+  const resultQueryString = graphqlMask(
     astSchema,
     `
     query RandomQuery {
@@ -34,7 +34,7 @@ test("removing fields from query that aren't in schema", () => {
     }
   `
   );
-  expect(editedAst).toMatchSnapshot();
+  expect(resultQueryString).toMatchSnapshot();
 });
 
 test("removing arguments that don't exist in schema", () => {
@@ -46,7 +46,7 @@ test("removing arguments that don't exist in schema", () => {
     `)
   );
 
-  const editedAst = graphqlMask(
+  const resultQueryString = graphqlMask(
     astSchema,
     `
     query RandomQuery {
@@ -54,5 +54,21 @@ test("removing arguments that don't exist in schema", () => {
     }
   `
   );
-  expect(editedAst).toMatchSnapshot();
+  expect(resultQueryString).toMatchSnapshot();
+});
+
+test("passing a string schema instead of a parsed one", () => {
+  const resultQueryString = graphqlMask(
+    `
+    type Query {
+      two: Int
+    }`,
+    `
+    query RandomQuery {
+      one
+      two      
+    }
+  `
+  );
+  expect(resultQueryString).toMatchSnapshot();
 });
