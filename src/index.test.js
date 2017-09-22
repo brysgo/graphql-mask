@@ -72,3 +72,15 @@ test("passing a string schema instead of a parsed one", () => {
   );
   expect(resultQueryString).toMatchSnapshot();
 });
+
+test("doesn't break minification", () => {
+  var UglifyJS = require("uglify-js");
+  var fs = require("fs");
+  var result = UglifyJS.minify(fs.readFileSync("./src/index.js", "utf8"));
+  expect(result).toEqual(jasmine.objectContaining({
+    code: jasmine.any(String)
+  }));
+  expect(result).not.toEqual(jasmine.objectContaining({
+    error: jasmine.anything()
+  }));
+})

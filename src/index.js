@@ -1,20 +1,27 @@
 // @flow
 
-const { parse, visit, visitWithTypeInfo, print } = require("graphql/language");
-const { TypeInfo, buildASTSchema } = require("graphql/utilities");
+var graphqlLanguage = require("graphql/language"),
+parse = graphqlLanguage.parse,
+visit = graphqlLanguage.visit,
+visitWithTypeInfo = graphqlLanguage.visitWithTypeInfo,
+print = graphqlLanguage.print;
+
+var graphqlUtilities = require("graphql/utilities"),
+TypeInfo = graphqlUtilities.TypeInfo,
+buildASTSchema = graphqlUtilities.buildASTSchema;
 
 module.exports = function graphqlMask(schema, query) {
-  const astSchema =
+  var astSchema =
     typeof schema === "string" ? buildASTSchema(parse(schema)) : schema;
-  const typeInfo = new TypeInfo(astSchema);
+  var typeInfo = new TypeInfo(astSchema);
   return print(
     visit(
       parse(query),
       visitWithTypeInfo(typeInfo, {
-        enter(node, key, parent, path, ancestors) {
-          const parentType = typeInfo.getParentType();
-          const type = typeInfo.getType();
-          const inputType = typeInfo.getInputType();
+        enter: function(node, key, parent, path, ancestors) {
+          var parentType = typeInfo.getParentType();
+          var type = typeInfo.getType();
+          var inputType = typeInfo.getInputType();
           if (
             (node.kind === "Field" && !type) ||
             (node.kind === "Argument" && !inputType)
@@ -22,7 +29,7 @@ module.exports = function graphqlMask(schema, query) {
             return null;
           }
         },
-        leave(node, key, parent, path, ancestors) {}
+        leave: function(node, key, parent, path, ancestors) {}
       })
     )
   );
