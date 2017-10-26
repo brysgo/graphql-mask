@@ -23,7 +23,7 @@ module.exports = function graphqlMask(schema, query) {
           var type = typeInfo.getType();
           var inputType = typeInfo.getInputType();
           if (
-            (node.kind === "Field" && !type) ||
+            ((node.kind === "Field" || node.kind === "OperationDefinition") && !type) ||
             (node.kind === "Argument" && !inputType)
           ) {
             return null;

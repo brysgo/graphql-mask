@@ -68,6 +68,10 @@ test("passing a string schema instead of a parsed one", () => {
       one
       two      
     }
+
+    mutation Mutation {
+      getRidOfThis(foo: "bar")
+    }
   `
   );
   expect(resultQueryString).toMatchSnapshot();
