@@ -88,3 +88,97 @@ test("doesn't break minification", () => {
     error: jasmine.anything()
   }));
 })
+
+test("it doesn't leave behind empty selections", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+    type Query {
+      this: [Bar]!
+      random: String
+      thing: Int!
+    }
+    type Bar {
+      id: ID!
+      is: String
+      a: Int
+    }
+    `)
+
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    query RandomQuery {
+      this {
+        not
+        in
+        schema
+      }
+      thing
+    }
+  `
+  );
+  expect(resultQueryString).toMatchSnapshot();
+});
+
+test("filters out empty operations", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+    type Query {
+      this: [Bar]!
+      random: String
+      thing: Int!
+    }
+    type Bar {
+      id: ID!
+      is: String
+      a: Int
+    }
+    `)
+
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    query Gone {
+      woah
+      wrong
+    }
+
+    query Stay {
+      random
+      thing
+    }
+  `
+  );
+  expect(resultQueryString).toMatchSnapshot();
+});
+
+
+test("returns null if query has no operations", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+    type Query {
+      this: [Bar]!
+      random: String
+      thing: Int!
+    }
+    type Bar {
+      id: ID!
+      is: String
+      a: Int
+    }
+    `)
+
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    query Gone {
+      woah
+      wrong
+    }
+  `
+  );
+  expect(resultQueryString).toEqual(null);
+});

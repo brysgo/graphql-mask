@@ -1,5 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`filters out empty operations 1`] = `
+"query Stay {
+  random
+  thing
+}
+"
+`;
+
+exports[`it doesn't leave behind empty selections 1`] = `
+"query RandomQuery {
+  thing
+}
+"
+`;
+
 exports[`passing a string schema instead of a parsed one 1`] = `
 "query RandomQuery {
   two
