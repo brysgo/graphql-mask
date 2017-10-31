@@ -22,6 +22,15 @@ exports[`passing a string schema instead of a parsed one 1`] = `
 "
 `;
 
+exports[`removes fragment (its usages) and inline fragments if it has no selection 1`] = `
+"query WithFragments {
+  this {
+    id
+  }
+}
+"
+`;
+
 exports[`removing arguments that don't exist in schema 1`] = `
 "query RandomQuery {
   something(bar: 4)

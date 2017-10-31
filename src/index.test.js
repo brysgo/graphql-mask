@@ -81,13 +81,17 @@ test("doesn't break minification", () => {
   var UglifyJS = require("uglify-js");
   var fs = require("fs");
   var result = UglifyJS.minify(fs.readFileSync("./src/index.js", "utf8"));
-  expect(result).toEqual(jasmine.objectContaining({
-    code: jasmine.any(String)
-  }));
-  expect(result).not.toEqual(jasmine.objectContaining({
-    error: jasmine.anything()
-  }));
-})
+  expect(result).toEqual(
+    jasmine.objectContaining({
+      code: jasmine.any(String)
+    })
+  );
+  expect(result).not.toEqual(
+    jasmine.objectContaining({
+      error: jasmine.anything()
+    })
+  );
+});
 
 test("it doesn't leave behind empty selections", () => {
   const astSchema = buildASTSchema(
@@ -103,7 +107,6 @@ test("it doesn't leave behind empty selections", () => {
       a: Int
     }
     `)
-
   );
   const resultQueryString = graphqlMask(
     astSchema,
@@ -135,7 +138,6 @@ test("filters out empty operations", () => {
       a: Int
     }
     `)
-
   );
   const resultQueryString = graphqlMask(
     astSchema,
@@ -154,7 +156,6 @@ test("filters out empty operations", () => {
   expect(resultQueryString).toMatchSnapshot();
 });
 
-
 test("returns null if query has no operations", () => {
   const astSchema = buildASTSchema(
     parse(`
@@ -169,7 +170,6 @@ test("returns null if query has no operations", () => {
       a: Int
     }
     `)
-
   );
   const resultQueryString = graphqlMask(
     astSchema,
@@ -181,4 +181,42 @@ test("returns null if query has no operations", () => {
   `
   );
   expect(resultQueryString).toEqual(null);
+});
+
+test("removes fragment (its usages) and inline fragments if it has no selection", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+    type Query {
+      this: [Bar]!
+      random: String
+      thing: Int!
+    }
+    type Bar {
+      id: ID!
+      is: String
+      a: Int
+    }
+    `)
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    query WithFragments {
+      this {
+        id
+        ...Blah
+      }
+
+      ... on Query {
+        wherediditgo
+      }
+    }
+
+    fragment Blah on Bar {
+      notthings
+      onbar
+    }
+  `
+  );
+  expect(resultQueryString).toMatchSnapshot();
 });
