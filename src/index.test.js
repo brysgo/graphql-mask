@@ -220,3 +220,25 @@ test("removes fragment (its usages) and inline fragments if it has no selection"
   );
   expect(resultQueryString).toMatchSnapshot();
 });
+
+test("removes unused fragments", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        id: ID!
+      }
+    `)
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    query Query {
+      id
+    }
+
+    fragment Foo on Query {
+      id # why is this here
+    }`
+  );
+  expect(resultQueryString).toMatchSnapshot();
+});

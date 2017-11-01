@@ -31,6 +31,13 @@ exports[`removes fragment (its usages) and inline fragments if it has no selecti
 "
 `;
 
+exports[`removes unused fragments 1`] = `
+"query Query {
+  id
+}
+"
+`;
+
 exports[`removing arguments that don't exist in schema 1`] = `
 "query RandomQuery {
   something(bar: 4)

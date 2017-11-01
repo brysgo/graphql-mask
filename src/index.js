@@ -14,42 +14,59 @@ var graphqlUtilities = require("graphql/utilities"),
   TypeInfo = graphqlUtilities.TypeInfo,
   buildASTSchema = graphqlUtilities.buildASTSchema;
 
-var removedFragmentDefinitions = {};
+var existingFragmentDefinitions;
+var usedFragments;
+var markedForRemovalThisPass;
 
+function markForRemoval(node) {
+  markedForRemovalThisPass++;
+  return (node.markedForRemoval = true);
+}
 function markedForRemoval(node) {
   return node.markedForRemoval;
 }
-function markAncestors(ancestors, type) {
-  ancestors.some(function(node, type) {
-    markNode(node, type);
-    return !node.markedForRemoval;
-  });
-}
-function markNode(node, type) {
+function markNode(node, typeInfo) {
+  var parentType = typeInfo.getParentType();
+  var type = typeInfo.getType();
+  var inputType = typeInfo.getInputType();
+
   if (!node) return;
   switch (node.kind) {
     case "Document":
-      if (node.definitions.every(markedForRemoval))
-        node.markedForRemoval = true;
+      if (node.definitions.every(markedForRemoval)) markForRemoval(node);
       break;
     case "SelectionSet":
-      if (node.selections.every(markedForRemoval)) node.markedForRemoval = true;
+      if (node.selections.every(markedForRemoval)) markForRemoval(node);
       break;
     case "FragmentSpread":
+      usedFragments[node.name.value] = true;
       break;
     case "FragmentDefinition":
       if (!node.selectionSet || node.selectionSet.markedForRemoval) {
-        removedFragmentDefinitions[node.name.value] = true;
-        node.markedForRemoval = true;
+        markForRemoval(node);
+      } else if (!node.markedForRemoval) {
+        existingFragmentDefinitions[node.name.value] = true;
       }
       break;
     case "Field":
-      if (isLeafType(getNamedType(type))) break;
+      if (!type) markForRemoval(node);
+      if (
+        !isLeafType(getNamedType(type)) &&
+        (!node.selectionSet || node.selectionSet.markedForRemoval)
+      )
+        markForRemoval(node);
+      break;
     case "OperationDefinition":
+      if (!type) {
+        markForRemoval(node);
+      }
     case "InlineFragment":
       if (!node.selectionSet || node.selectionSet.markedForRemoval) {
-        node.markedForRemoval = true;
+        markForRemoval(node);
       }
+      break;
+    case "Argument":
+      if (!inputType) markForRemoval(node);
       break;
   }
 }
@@ -58,50 +75,34 @@ module.exports = function graphqlMask(schema, query) {
   var astSchema =
     typeof schema === "string" ? buildASTSchema(parse(schema)) : schema;
   var typeInfo = new TypeInfo(astSchema);
-  return print(
-    visit(
-      visit(
-        parse(query),
-        visitWithTypeInfo(typeInfo, {
-          enter: function(node, key, siblings, path, ancestors) {
-            var parentType = typeInfo.getParentType();
-            var type = typeInfo.getType();
-            var inputType = typeInfo.getInputType();
-            switch (node.kind) {
-              case "Field":
-              case "OperationDefinition":
-                if (!type) {
-                  node.markedForRemoval = true;
-                  if (siblings[siblings.length - 1] === node) {
-                    markAncestors(ancestors, type);
-                  }
-                }
-                break;
-              case "Argument":
-                if (!inputType) node.markedForRemoval = true;
-                break;
-            }
-          },
-          leave: function(node, key, siblings, path, ancestors) {
-            var type = typeInfo.getType();
-
-            markNode(node, type);
-          }
-        })
-      ),
-      {
+  var incrementalAst = parse(query);
+  do {
+    markedForRemovalThisPass = 0;
+    existingFragmentDefinitions = {};
+    usedFragments = {};
+    incrementalAst = visit(
+      incrementalAst,
+      visitWithTypeInfo(typeInfo, {
+        enter: function(node, key, siblings, path, ancestors) {
+          markNode(node, typeInfo);
+        },
         leave: function(node, key, siblings, path, ancestors) {
+          switch (node.kind) {
+            case "FragmentSpread":
+              if (!existingFragmentDefinitions[node.name.value])
+                markForRemoval(node);
+              break;
+            case "FragmentDefinition":
+              if (!usedFragments[node.name.value]) markForRemoval(node);
+              break;
+          }
+
           if (node.markedForRemoval) {
             return null;
           }
-
-          switch (node.kind) {
-            case "FragmentSpread":
-              if (removedFragmentDefinitions[node.name.value]) return null;
-              break;
-          }
         }
-      }
-    )
-  );
+      })
+    );
+  } while (markedForRemovalThisPass > 0);
+  return print(incrementalAst);
 };
