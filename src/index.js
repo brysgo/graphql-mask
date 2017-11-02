@@ -42,7 +42,12 @@ module.exports = function graphqlMask(schema, query) {
         }
       },
       leave: function(node) {
+        if (!node) return null;
         switch (node.kind) {
+          case "FragmentDefinition":
+            if (!node.typeCondition) {
+              return null;
+            }
           case "FragmentSpread":
             if (!node.name) {
               return null;

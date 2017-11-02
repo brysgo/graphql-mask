@@ -1,2 +1,4 @@
 /node_modules
 npm-debug.log*
+*.local.test.js
+*.local.test.js.snap
