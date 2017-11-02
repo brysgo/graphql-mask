@@ -207,9 +207,6 @@ test("removes fragment (its usages) and inline fragments if it has no selection"
         ...Blah
       }
 
-      ... on Query {
-        wherediditgo
-      }
     }
 
     fragment Blah on Bar {
