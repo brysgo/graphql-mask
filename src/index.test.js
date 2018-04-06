@@ -239,3 +239,53 @@ test("removes unused fragments", () => {
   );
   expect(resultQueryString).toMatchSnapshot();
 });
+
+test("filters queries with unknown input types", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      type Mutation {
+        bar(data: String): String 
+      }
+    `)
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    query getFizz($filter: FizzFilter!) {
+      fizz(filter: $filter) {
+        fizzle
+      }
+    }
+  `
+  );
+  expect(resultQueryString).toMatchSnapshot();
+});
+
+test("filters mutations with unknown input types", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      type Mutation {
+        bar(data: String): String 
+      }
+    `)
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    mutation fizzer($data: FizzInput!) {
+      fizz(data: $data) {
+        fizzle
+      }
+    }
+  `
+  );
+  expect(resultQueryString).toMatchSnapshot();
+});
