@@ -29,7 +29,6 @@ module.exports = function graphqlMask(schema, query) {
   var incrementalAst = parse(query);
   var errors;
   while ((errors = validate(astSchema, incrementalAst, rules)).length > 0) {
-    console.log(errors);
     var nodes = [].concat.apply(
       [],
       errors.map(function(e) {
@@ -57,7 +56,6 @@ module.exports = function graphqlMask(schema, query) {
         }
       }
     });
-    console.log(print(incrementalAst));
   }
   var result = print(incrementalAst);
   return isBlank(result) ? null : result;
