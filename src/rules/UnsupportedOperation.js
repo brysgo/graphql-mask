@@ -20,7 +20,7 @@ function UnsupportedOperation(context) {
       if (!type) {
         context.reportError(
           new _error.GraphQLError(
-            unsupportedOperationMessage(node.name.value),
+            unsupportedOperationMessage(node.name ? node.name.value : 'unknown'),
             [node]
           )
         );
