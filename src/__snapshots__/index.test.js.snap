@@ -14,6 +14,8 @@ exports[`does not filter queries with known input types 1`] = `
 "
 `;
 
+exports[`filters mutations with no operation name 1`] = `null`;
+
 exports[`filters mutations with unknown input types 1`] = `null`;
 
 exports[`filters out empty operations 1`] = `
@@ -23,6 +25,8 @@ exports[`filters out empty operations 1`] = `
 }
 "
 `;
+
+exports[`filters queries with no operation name 1`] = `null`;
 
 exports[`filters queries with unknown input types 1`] = `null`;
 
