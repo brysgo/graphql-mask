@@ -13,7 +13,7 @@
     "graphql": "^0.13.0"
   },
   "devDependencies": {
-    "jest-cli": "^22.0.0",
+    "jest-cli": "^23.0.0",
     "uglify-js": "^3.1.1"
   },
   "author": "Bryan Goldstein",
