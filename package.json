@@ -9,9 +9,7 @@
     "coverage": "jest --coverage",
     "coverage:watch": "jest --coverage --watch"
   },
-  "dependencies": {
-    "graphql": "^0.13.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "jest-cli": "^23.0.0",
     "uglify-js": "^3.1.1"
@@ -19,5 +17,8 @@
   "author": "Bryan Goldstein",
   "homepage": "",
   "license": "MIT",
-  "repository": "git@github.com:brysgo/graphql-mask.git"
+  "repository": "git@github.com:brysgo/graphql-mask.git",
+  "peerDependencies": {
+    "graphql": "*"
+  }
 }
