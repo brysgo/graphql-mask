@@ -10,7 +10,7 @@
     "coverage:watch": "jest --coverage --watch"
   },
   "dependencies": {
-    "graphql": "^0.13.0"
+    "graphql": "^14.0.0-rc.1"
   },
   "devDependencies": {
     "jest-cli": "^23.0.0",
