@@ -18,6 +18,7 @@ $ yarn add graphql-mask
 
 ```
 const graphqlMask = require("graphql-mask");
+// const graphqlMask = require("graphql-mask/es5"); if you need to use this in a browser
 
 const result = graphqlMask(`
   type Query {

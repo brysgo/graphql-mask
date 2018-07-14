@@ -1,18 +1,22 @@
 {
   "name": "graphql-mask",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "GraphQL Mask lets you subtract everything outside a schema from a query",
   "main": "src/index.js",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
     "coverage": "jest --coverage",
-    "coverage:watch": "jest --coverage --watch"
+    "coverage:watch": "jest --coverage --watch",
+    "build": "rimraf lib && babel src -d es5"
   },
   "dependencies": {},
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "graphql": "^0.13.0",
     "jest-cli": "^23.0.0",
+    "rimraf": "^2.6.2",
     "uglify-js": "^3.1.1"
   },
   "author": "Bryan Goldstein",
