@@ -8,6 +8,7 @@
     "test:watch": "jest --watch",
     "coverage": "jest --coverage",
     "coverage:watch": "jest --coverage --watch",
+    "prepublishOnly": "yarn build",
     "build": "rimraf lib && babel src -d es5"
   },
   "dependencies": {},
