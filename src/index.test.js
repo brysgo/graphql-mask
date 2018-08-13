@@ -77,20 +77,28 @@ test("passing a string schema instead of a parsed one", () => {
   expect(resultQueryString).toMatchSnapshot();
 });
 
-xtest("doesn't break minification", () => {
-  var UglifyJS = require("uglify-js");
-  var fs = require("fs");
-  var result = UglifyJS.minify(fs.readFileSync("./src/index.js", "utf8"));
-  expect(result).toEqual(
-    jasmine.objectContaining({
-      code: jasmine.any(String)
-    })
-  );
-  expect(result).not.toEqual(
-    jasmine.objectContaining({
-      error: jasmine.anything()
-    })
-  );
+test("doesn't break minification", () => {
+  try {
+    var UglifyJS = require("uglify-js");
+  } catch (e) {
+    console.log("error loading uglify");
+  }
+  if (UglifyJS) {
+    var fs = require("fs");
+    var result = UglifyJS.minify(fs.readFileSync("./src/index.js", "utf8"));
+    expect(result).toEqual(
+      jasmine.objectContaining({
+        code: jasmine.any(String)
+      })
+    );
+    expect(result).not.toEqual(
+      jasmine.objectContaining({
+        error: jasmine.anything()
+      })
+    );
+  } else {
+    console.log("skipping uglify test");
+  }
 });
 
 test("it doesn't leave behind empty selections", () => {
