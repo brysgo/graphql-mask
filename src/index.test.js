@@ -66,7 +66,7 @@ test("passing a string schema instead of a parsed one", () => {
     `
     query RandomQuery {
       one
-      two      
+      two
     }
 
     mutation Mutation {
@@ -247,3 +247,165 @@ test("removes unused fragments", () => {
   );
   expect(resultQueryString).toMatchSnapshot();
 });
+
+test("filters queries with unknown input types", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      type Mutation {
+        bar(data: String): String
+      }
+    `)
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    query getFizz($filter: FizzFilter!) {
+      fizz(filter: $filter) {
+        fizzle
+      }
+    }
+  `
+  );
+  expect(resultQueryString).toMatchSnapshot();
+});
+
+test("filters mutations with unknown input types", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      type Mutation {
+        bar(data: String): String
+      }
+    `)
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    mutation fuzzer($data: FizzInput!) {
+      fizz(data: $data) {
+        fizzle
+      }
+    }
+  `
+  );
+  expect(resultQueryString).toMatchSnapshot();
+});
+
+test("filters queries with no operation name", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      type Mutation {
+        bar(data: String): String
+      }
+    `)
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    query ($filter: FizzFilter!) {
+      fizz(filter: $filter) {
+        fizzle
+      }
+    }
+  `
+  );
+  expect(resultQueryString).toMatchSnapshot();
+});
+
+test("filters mutations with no operation name", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      type Mutation {
+        bar(data: String): String
+      }
+    `)
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    mutation ($data: FizzInput!) {
+      fizz(data: $data) {
+        fizzle
+      }
+    }
+  `
+  );
+  expect(resultQueryString).toMatchSnapshot();
+});
+
+test("does not filter queries with known input types", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo(filter: FuzzFilter): String
+        fuzz(filter: FuzzFilter): String
+      }
+
+      input FuzzFilter {
+        baz: String
+      }
+
+      type Mutation {
+        bar(data: String): String
+      }
+    `)
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    query getFuzz($filter: FuzzFilter!) {
+      fuzz(filter: $filter) {
+        fuzzle
+      }
+    }
+  `
+  );
+  expect(resultQueryString).toMatchSnapshot();
+});
+
+test("does not filter mutations with known input types", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      input FuzzInput {
+        baz: String
+      }
+
+      type Mutation {
+        bar(data: FuzzInput): String
+        fuzz(data: FuzzInput): String
+      }
+    `)
+  );
+  const resultQueryString = graphqlMask(
+    astSchema,
+    `
+    mutation fuzzer($data: FuzzInput!) {
+      fuzz(data: $data) {
+        fuzzle
+      }
+    }
+  `
+  );
+  expect(resultQueryString).toMatchSnapshot();
+});
+
+

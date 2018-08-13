@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`does not filter mutations with known input types 1`] = `
+"mutation fuzzer($data: FuzzInput!) {
+  fuzz(data: $data)
+}
+"
+`;
+
+exports[`does not filter queries with known input types 1`] = `
+"query getFuzz($filter: FuzzFilter!) {
+  fuzz(filter: $filter)
+}
+"
+`;
+
+exports[`filters mutations with no operation name 1`] = `null`;
+
+exports[`filters mutations with unknown input types 1`] = `null`;
+
 exports[`filters out empty operations 1`] = `
 "query Stay {
   random
@@ -7,6 +25,10 @@ exports[`filters out empty operations 1`] = `
 }
 "
 `;
+
+exports[`filters queries with no operation name 1`] = `null`;
+
+exports[`filters queries with unknown input types 1`] = `null`;
 
 exports[`it doesn't leave behind empty selections 1`] = `
 "query RandomQuery {
