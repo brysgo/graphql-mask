@@ -424,19 +424,19 @@ test("removing variable properties that don't exist in schema", () => {
       }
     `)
   );
-  const { query, variables } = graphqlMask(
-    astSchema,
-    `
-    mutation fuzzer($data: FuzzInput!) {
-      fuzz(data: $data) 
-    }
-  `,
-    {
+  const { maskedVariables } = graphqlMask({
+    schema: astSchema,
+    query: `
+        mutation fuzzer($data: FuzzInput!) {
+          fuzz(data: $data) 
+        }
+      `,
+    variables: {
       data: {
         baz: "Hello",
         bar: "should be filtered"
       }
     }
-  );
-  expect(variables).toMatchSnapshot();
+  });
+  expect(maskedVariables).toMatchSnapshot();
 });

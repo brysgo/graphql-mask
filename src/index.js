@@ -41,10 +41,43 @@ function resolveType(type) {
   return innerType;
 }
 
-module.exports = function graphqlMask(schema, query, variables) {
+module.exports = function graphqlMask(argsOrSchema, deprecatedQuery) {
+  var deprecatedUsage = deprecatedQuery && !argsOrSchema.schema;
+
+  if (deprecatedUsage) {
+    console.warn(
+      "Use of positional arguments has been deprecated. Please use argument object with named properties."
+    );
+  }
+  var schema = deprecatedUsage ? argsOrSchema : argsOrSchema.schema;
+  var query = deprecatedUsage ? deprecatedQuery : argsOrSchema.query;
+  var variables = argsOrSchema.variables;
+
+  var result = mask(schema, query, variables);
+
+  if (deprecatedUsage) {
+    console.warn(
+      "Return value of only masked query has been deprecated. Please migrate to use return object containing masked query and variables."
+    );
+    return result.maskedQuery;
+  } else {
+    return {
+      maskedQuery: result.maskedQuery,
+      maskedVariables: result.maskedVariables
+    };
+  }
+};
+
+function mask(schema, query, variables) {
   var astSchema =
     typeof schema === "string" ? buildASTSchema(parse(schema)) : schema;
-  var typeInfo = new TypeInfo(astSchema);
+
+  var maskedQuery = maskQuery(astSchema, query);
+  var maskedVariables = maskVariables(astSchema, maskedQuery, variables);
+  return { maskedQuery: maskedQuery, maskedVariables: maskedVariables };
+}
+
+function maskQuery(astSchema, query) {
   var incrementalAst = parse(query);
   var errors;
   while ((errors = validate(astSchema, incrementalAst, rules)).length > 0) {
@@ -76,17 +109,21 @@ module.exports = function graphqlMask(schema, query, variables) {
       }
     });
   }
-  var query = print(incrementalAst);
-  query = isBlank(query) ? null : query;
-  if (!variables) {
-    return query;
-  }
+  var maskedQuery = print(incrementalAst);
+  maskedQuery = isBlank(maskedQuery) ? null : maskedQuery;
+  return maskedQuery;
+}
 
-  var operation = incrementalAst.definitions.find(function(d) {
+function maskVariables(astSchema, maskedQuery, variables) {
+  if (!variables) {
+    return variables;
+  }
+  var maskedQueryAst = parse(maskedQuery);
+  var operation = maskedQueryAst.definitions.find(function(d) {
     return d.kind === "OperationDefinition";
   });
 
-  var filteredVariables = {};
+  var maskedVariables = {};
   var variableDefinitions = operation.variableDefinitions;
   var varDefNode = variableDefinitions[0];
   var varName = varDefNode.variable.name.value;
@@ -101,6 +138,6 @@ module.exports = function graphqlMask(schema, query, variables) {
       }
     }
   }
-  filteredVariables[varName] = varValue;
-  return { query: query, variables: filteredVariables };
-};
+  maskedVariables[varName] = varValue;
+  return maskedVariables;
+}
