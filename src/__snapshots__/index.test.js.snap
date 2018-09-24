@@ -78,3 +78,11 @@ exports[`removing fields from query that aren't in schema 1`] = `
 }
 "
 `;
+
+exports[`removing variable properties that don't exist in schema 1`] = `
+Object {
+  "data": Object {
+    "baz": "Hello",
+  },
+}
+`;

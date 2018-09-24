@@ -408,4 +408,35 @@ test("does not filter mutations with known input types", () => {
   expect(resultQueryString).toMatchSnapshot();
 });
 
+test("removing variable properties that don't exist in schema", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
 
+      input FuzzInput {
+        baz: String
+      }
+
+      type Mutation {
+        fuzz(data: FuzzInput): String
+      }
+    `)
+  );
+  const { query, variables } = graphqlMask(
+    astSchema,
+    `
+    mutation fuzzer($data: FuzzInput!) {
+      fuzz(data: $data) 
+    }
+  `,
+    {
+      data: {
+        baz: "Hello",
+        bar: "should be filtered"
+      }
+    }
+  );
+  expect(variables).toMatchSnapshot();
+});

@@ -1,28 +1,47 @@
 // @flow
-
 var graphqlLanguage = require("graphql/language"),
   parse = graphqlLanguage.parse,
   visit = graphqlLanguage.visit,
-  visitWithTypeInfo = graphqlLanguage.visitWithTypeInfo,
   print = graphqlLanguage.print;
 
 var graphqlType = require("graphql/type"),
+  GraphQLList = graphqlType.GraphQLList,
+  GraphQLNonNull = graphqlType.GraphQLNonNull,
   isLeafType = graphqlType.isLeafType,
   getNamedType = graphqlType.getNamedType;
 
 var graphqlUtilities = require("graphql/utilities"),
   TypeInfo = graphqlUtilities.TypeInfo,
-  buildASTSchema = graphqlUtilities.buildASTSchema;
+  buildASTSchema = graphqlUtilities.buildASTSchema,
+  typeFromAST = graphqlUtilities.typeFromAST;
 
 var graphqlValidation = require("graphql/validation"),
   validate = graphqlValidation.validate;
+
+var graphqlExecutionValues = require("graphql/execution/values"),
+  getVariableValues = graphqlExecutionValues.getVariableValues;
 
 var rules = require("./rules");
 
 function isBlank(str) {
   return !str || /^\s*$/.test(str);
 }
-module.exports = function graphqlMask(schema, query) {
+
+function resolveType(type) {
+  if (!type) {
+    return type;
+  }
+  var innerType = type;
+  while (
+    innerType instanceof GraphQLNonNull ||
+    innerType instanceof GraphQLList
+  ) {
+    innerType = innerType.ofType;
+  }
+  return innerType;
+}
+
+module.exports = function graphqlMask(schema, query, variables) {
   var astSchema =
     typeof schema === "string" ? buildASTSchema(parse(schema)) : schema;
   var typeInfo = new TypeInfo(astSchema);
@@ -57,6 +76,31 @@ module.exports = function graphqlMask(schema, query) {
       }
     });
   }
-  var result = print(incrementalAst);
-  return isBlank(result) ? null : result;
+  var query = print(incrementalAst);
+  query = isBlank(query) ? null : query;
+  if (!variables) {
+    return query;
+  }
+
+  var operation = incrementalAst.definitions.find(function(d) {
+    return d.kind === "OperationDefinition";
+  });
+
+  var filteredVariables = {};
+  var variableDefinitions = operation.variableDefinitions;
+  var varDefNode = variableDefinitions[0];
+  var varName = varDefNode.variable.name.value;
+  var varType = resolveType(typeFromAST(astSchema, varDefNode.type));
+  var varValue = variables[varName];
+  var varFields = varType.getFields();
+  // Ensure every provided field is defined.
+  for (var fieldName in varValue) {
+    if (Object.prototype.hasOwnProperty.call(varValue, fieldName)) {
+      if (!varFields[fieldName]) {
+        delete varValue[fieldName];
+      }
+    }
+  }
+  filteredVariables[varName] = varValue;
+  return { query: query, variables: filteredVariables };
 };
