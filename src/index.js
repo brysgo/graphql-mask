@@ -7,6 +7,7 @@ var graphqlLanguage = require("graphql/language"),
 var graphqlType = require("graphql/type"),
   GraphQLList = graphqlType.GraphQLList,
   GraphQLNonNull = graphqlType.GraphQLNonNull,
+  isInputObjectType = graphqlType.isInputObjectType,
   isLeafType = graphqlType.isLeafType,
   getNamedType = graphqlType.getNamedType;
 
@@ -132,16 +133,32 @@ function maskVariables(astSchema, maskedQuery, variables) {
     var varName = varDefNode.variable.name.value;
     var varType = resolveType(typeFromAST(astSchema, varDefNode.type));
     var varValue = variables[varName];
-    var varFields = varType.getFields();
-    // Ensure every provided field is defined.
-    for (var fieldName in varValue) {
-      if (Object.prototype.hasOwnProperty.call(varValue, fieldName)) {
-        if (!varFields[fieldName]) {
-          delete varValue[fieldName];
+    maskedVariables[varName] = maskVariable(astSchema, varValue, varType);
+  });
+  return maskedVariables;
+}
+
+function maskVariable(astSchema, variable, variableType) {
+  var maskedVariable = {};
+  var varFields = variableType.getFields();
+  // Ensure every provided field is defined.
+  for (var fieldName in variable) {
+    if (Object.prototype.hasOwnProperty.call(variable, fieldName)) {
+      if (varFields[fieldName]) {
+        var fieldType = resolveType(
+          astSchema.getType(varFields[fieldName].type)
+        );
+        if (isInputObjectType(fieldType)) {
+          maskedVariable[fieldName] = maskVariable(
+            astSchema,
+            variable[fieldName],
+            fieldType
+          );
+        } else {
+          maskedVariable[fieldName] = variable[fieldName];
         }
       }
     }
-    maskedVariables[varName] = varValue;
-  });
-  return maskedVariables;
+  }
+  return maskedVariable;
 }

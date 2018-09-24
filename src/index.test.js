@@ -408,7 +408,7 @@ test("does not filter mutations with known input types", () => {
   expect(resultQueryString).toMatchSnapshot();
 });
 
-test("removing variable properties that don't exist in schema", () => {
+test("remove variable properties that don't exist in schema", () => {
   const astSchema = buildASTSchema(
     parse(`
       type Query {
@@ -441,7 +441,7 @@ test("removing variable properties that don't exist in schema", () => {
   expect(maskedVariables).toMatchSnapshot();
 });
 
-test("removing variable properties from multiple input types that don't exist in schema", () => {
+test("remove variable properties from multiple input types that don't exist in schema", () => {
   const astSchema = buildASTSchema(
     parse(`
       type Query {
@@ -480,4 +480,140 @@ test("removing variable properties from multiple input types that don't exist in
     }
   });
   expect(maskedVariables).toMatchSnapshot();
+});
+
+test("remove variable properties from nested input types that don't exist in schema", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      input UserInput {
+        name: String
+        address: AddressInput
+      }
+
+      input AddressInput {
+        city: String
+      }
+
+      type Mutation {
+        addUserAndAddress(user: UserInput): Boolean
+      }
+    `)
+  );
+  const { maskedVariables } = graphqlMask({
+    schema: astSchema,
+    query: `
+        mutation appMutation($user: UserInput) {
+          addUserAndAddress(user: $user) 
+        }
+      `,
+    variables: {
+      user: {
+        name: "Steve",
+        age: 33,
+        address: {
+          street: "123 Main St.",
+          city: "Kitchener"
+        }
+      }
+    }
+  });
+  expect(maskedVariables).toMatchSnapshot();
+});
+
+test("remove variable properties from multiple and nested input types that don't exist in schema", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      input UserInput {
+        name: String
+        address: AddressInput
+      }
+      
+      input AddressInput {
+        city: String
+      }
+
+      input EmployerInput {
+        company: String
+      }
+
+      type Mutation {
+        addUserAndAddressAndEmployer(user: UserInput, employer: EmployerInput): Boolean
+      }
+    `)
+  );
+  const { maskedVariables } = graphqlMask({
+    schema: astSchema,
+    query: `
+        mutation appMutation($user: UserInput!, $employer: EmployerInput) {
+          addUserAndAddressAndEmployer(user: $user, employer: $employer) 
+        }
+      `,
+    variables: {
+      user: {
+        name: "Steve",
+        age: 33,
+        address: {
+          street: "123 Main St.",
+          city: "Kitchener"
+        },
+        phone: {
+          type: "primary",
+          number: "555-555-5555"
+        }
+      },
+      employer: {
+        company: "Acme",
+        department: "Sales"
+      }
+    }
+  });
+  expect(maskedVariables).toMatchSnapshot();
+});
+
+test("removing variable properties and filtering query ", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      input FuzzInput {
+        baz: String
+      }
+
+      type FuzzOutput {
+        baz: String
+      }
+
+      type Mutation {
+        fuzz(data: FuzzInput): FuzzOutput
+      }
+    `)
+  );
+  const result = graphqlMask({
+    schema: astSchema,
+    query: `
+        mutation fuzzer($data: FuzzInput!) {
+          fuzz(data: $data) {
+            baz
+            foo
+          } 
+        }
+      `,
+    variables: {
+      data: {
+        baz: "Hello",
+        bar: "should be filtered"
+      }
+    }
+  });
+  expect(result).toMatchSnapshot();
 });
