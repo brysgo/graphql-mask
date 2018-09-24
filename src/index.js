@@ -7,20 +7,14 @@ var graphqlLanguage = require("graphql/language"),
 var graphqlType = require("graphql/type"),
   GraphQLList = graphqlType.GraphQLList,
   GraphQLNonNull = graphqlType.GraphQLNonNull,
-  isInputObjectType = graphqlType.isInputObjectType,
-  isLeafType = graphqlType.isLeafType,
-  getNamedType = graphqlType.getNamedType;
+  isInputObjectType = graphqlType.isInputObjectType;
 
 var graphqlUtilities = require("graphql/utilities"),
-  TypeInfo = graphqlUtilities.TypeInfo,
   buildASTSchema = graphqlUtilities.buildASTSchema,
   typeFromAST = graphqlUtilities.typeFromAST;
 
 var graphqlValidation = require("graphql/validation"),
   validate = graphqlValidation.validate;
-
-var graphqlExecutionValues = require("graphql/execution/values"),
-  getVariableValues = graphqlExecutionValues.getVariableValues;
 
 var rules = require("./rules");
 
@@ -57,9 +51,6 @@ module.exports = function graphqlMask(argsOrSchema, deprecatedQuery) {
   var result = mask(schema, query, variables);
 
   if (deprecatedUsage) {
-    console.warn(
-      "Return value of only masked query has been deprecated. Please migrate to use return object containing masked query and variables."
-    );
     return result.maskedQuery;
   } else {
     return {
