@@ -54,7 +54,7 @@ query ExampleQuery {
 }
 ```
 
-Since GraphQL 0.14.0 now supports the extension of `input` types, you can now use `grapqhl-mask` to filter input variables as well:
+Since GraphQL 14 now supports the extension of `input` types, you can now use `grapqhl-mask` to filter input variables as well:
 
 ```
 const { maskedQuery, maskedVariables } = graphqlMask({
