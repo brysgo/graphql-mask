@@ -125,19 +125,23 @@ function maskVariables(astSchema, maskedQuery, variables) {
 
   var maskedVariables = {};
   var variableDefinitions = operation.variableDefinitions;
-  var varDefNode = variableDefinitions[0];
-  var varName = varDefNode.variable.name.value;
-  var varType = resolveType(typeFromAST(astSchema, varDefNode.type));
-  var varValue = variables[varName];
-  var varFields = varType.getFields();
-  // Ensure every provided field is defined.
-  for (var fieldName in varValue) {
-    if (Object.prototype.hasOwnProperty.call(varValue, fieldName)) {
-      if (!varFields[fieldName]) {
-        delete varValue[fieldName];
+  if (!variableDefinitions || variableDefinitions.length === 0) {
+    return maskedVariables;
+  }
+  variableDefinitions.forEach(function(varDefNode) {
+    var varName = varDefNode.variable.name.value;
+    var varType = resolveType(typeFromAST(astSchema, varDefNode.type));
+    var varValue = variables[varName];
+    var varFields = varType.getFields();
+    // Ensure every provided field is defined.
+    for (var fieldName in varValue) {
+      if (Object.prototype.hasOwnProperty.call(varValue, fieldName)) {
+        if (!varFields[fieldName]) {
+          delete varValue[fieldName];
+        }
       }
     }
-  }
-  maskedVariables[varName] = varValue;
+    maskedVariables[varName] = varValue;
+  });
   return maskedVariables;
 }

@@ -440,3 +440,44 @@ test("removing variable properties that don't exist in schema", () => {
   });
   expect(maskedVariables).toMatchSnapshot();
 });
+
+test("removing variable properties from multiple input types that don't exist in schema", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      input UserInput {
+        name: String
+      }
+
+      input AddressInput {
+        city: String
+      }
+
+      type Mutation {
+        addUserAndAddress(user: UserInput, address: AddressInput): Boolean
+      }
+    `)
+  );
+  const { maskedVariables } = graphqlMask({
+    schema: astSchema,
+    query: `
+        mutation appMutation($user: UserInput!, $address: AddressInput!) {
+          addUserAndAddress(user: $user, address: $address) 
+        }
+      `,
+    variables: {
+      user: {
+        name: "Steve",
+        age: 33
+      },
+      address: {
+        street: "123 Main St.",
+        city: "Kitchener"
+      }
+    }
+  });
+  expect(maskedVariables).toMatchSnapshot();
+});
