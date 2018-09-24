@@ -8,8 +8,12 @@
 
 Graphql Mask is a simple utility for removing everything in a query (or its variables) that is not defined in a schema. Use it by passing in an arguments object containing the schema to mask against, the query to be masked, and optionally, the variables to be masked:
 
-```
-const { maskedQuery, maskedVariables } = graphqlMask({schema, query, variables});
+```javascript
+const { maskedQuery, maskedVariables } = graphqlMask({
+  schema,
+  query,
+  variables
+});
 ```
 
 ## Usage
@@ -22,7 +26,7 @@ $ yarn add graphql-mask
 
 Filtering a query:
 
-```
+```javascript
 const graphqlMask = require("graphql-mask");
 // const graphqlMask = require("graphql-mask/es5"); if you need to use this in a browser
 
@@ -56,7 +60,7 @@ query ExampleQuery {
 
 Since GraphQL 14 now supports the extension of `input` types, you can now use `grapqhl-mask` to filter input variables as well:
 
-```
+```javascript
 const { maskedQuery, maskedVariables } = graphqlMask({
   schema: `
     type Query {
@@ -91,7 +95,7 @@ const { maskedQuery, maskedVariables } = graphqlMask({
   }
 });
 
-console.log(maskedQuery)
+console.log(maskedQuery);
 console.log(maskedVariables);
 ```
 
@@ -107,7 +111,7 @@ mutation ExampleMutation($something: SomethingInput) {
 
 and
 
-```
+```javascript
 {
   something: {
     thisThing: "Apple",
@@ -119,21 +123,24 @@ and
 
 To support filtering of both query and input variables, the following usage has been deprecated as of v0.1.0. This method of invoking `graphql-mask` is still supported, but wil result in warning messages.
 
-```
-const result = graphqlMask(`
+```javascript
+const result = graphqlMask(
+  `
   type Query {
     something: String!
     somethingElse: Int
   }
-`,`
+`,
+  `
   query ExampleQuery {
     something
     somethingElse
     somethingNotInSchema
   }
-`)
+`
+);
 
-console.log(result)
+console.log(result);
 ```
 
 This will print...
