@@ -44,6 +44,50 @@ exports[`passing a string schema instead of a parsed one 1`] = `
 "
 `;
 
+exports[`remove variable properties from multiple and nested input types that don't exist in schema 1`] = `
+Object {
+  "employer": Object {
+    "company": "Acme",
+  },
+  "user": Object {
+    "address": Object {
+      "city": "Kitchener",
+    },
+    "name": "Steve",
+  },
+}
+`;
+
+exports[`remove variable properties from multiple input types that don't exist in schema 1`] = `
+Object {
+  "address": Object {
+    "city": "Kitchener",
+  },
+  "user": Object {
+    "name": "Steve",
+  },
+}
+`;
+
+exports[`remove variable properties from nested input types that don't exist in schema 1`] = `
+Object {
+  "user": Object {
+    "address": Object {
+      "city": "Kitchener",
+    },
+    "name": "Steve",
+  },
+}
+`;
+
+exports[`remove variable properties that don't exist in schema 1`] = `
+Object {
+  "data": Object {
+    "baz": "Hello",
+  },
+}
+`;
+
 exports[`removes fragment (its usages) and inline fragments if it has no selection 1`] = `
 "query WithFragments {
   this {
@@ -77,4 +121,20 @@ exports[`removing fields from query that aren't in schema 1`] = `
   thing
 }
 "
+`;
+
+exports[`removing variable properties and filtering query  1`] = `
+Object {
+  "maskedQuery": "mutation fuzzer($data: FuzzInput!) {
+  fuzz(data: $data) {
+    baz
+  }
+}
+",
+  "maskedVariables": Object {
+    "data": Object {
+      "baz": "Hello",
+    },
+  },
+}
 `;
