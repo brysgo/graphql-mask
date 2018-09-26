@@ -130,6 +130,9 @@ function maskVariables(astSchema, maskedQuery, variables) {
 }
 
 function maskVariable(astSchema, variable, variableType) {
+  if (!isInputObjectType(variableType)) {
+    return variable;
+  }
   var maskedVariable = {};
   var varFields = variableType.getFields();
   // Ensure every provided field is defined.
