@@ -37,6 +37,13 @@ exports[`it doesn't leave behind empty selections 1`] = `
 "
 `;
 
+exports[`masking variables doesn't try to getFields() on scalars 1`] = `
+Object {
+  "data": "Hello",
+  "otherData": 123,
+}
+`;
+
 exports[`passing a string schema instead of a parsed one 1`] = `
 "query RandomQuery {
   two

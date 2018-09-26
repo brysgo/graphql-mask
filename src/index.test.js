@@ -441,6 +441,33 @@ test("remove variable properties that don't exist in schema", () => {
   expect(maskedVariables).toMatchSnapshot();
 });
 
+test("masking variables doesn't try to getFields() on scalars", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      type Mutation {
+        fuzz(data: String, otherData: Int): String
+      }
+    `)
+  );
+  const { maskedVariables } = graphqlMask({
+    schema: astSchema,
+    query: `
+        mutation fuzzer($data: String, $otherData: Int) {
+          fuzz(data: $data, otherData: $otherData) 
+        }
+      `,
+    variables: {
+      data: "Hello",
+      otherData: 123
+    }
+  });
+  expect(maskedVariables).toMatchSnapshot();
+});
+
 test("remove variable properties from multiple input types that don't exist in schema", () => {
   const astSchema = buildASTSchema(
     parse(`
