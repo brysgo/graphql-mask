@@ -44,6 +44,8 @@ Object {
 }
 `;
 
+exports[`masking variables returns null if query is null (doesn't try to parse empty query) 1`] = `null`;
+
 exports[`passing a string schema instead of a parsed one 1`] = `
 "query RandomQuery {
   two
