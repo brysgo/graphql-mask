@@ -468,6 +468,28 @@ test("masking variables doesn't try to getFields() on scalars", () => {
   expect(maskedVariables).toMatchSnapshot();
 });
 
+test("masking variables returns null if query is null (doesn't try to parse empty query)", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+    `)
+  );
+  const { maskedVariables } = graphqlMask({
+    schema: astSchema,
+    query: `
+        query fuzzQuery($fuzzArg: String) {
+          fuzz(fuzzArg: $fuzzArg) 
+        }
+      `,
+    variables: {
+      fuzzArg: "Hello"
+    }
+  });
+  expect(maskedVariables).toMatchSnapshot();
+});
+
 test("remove variable properties from multiple input types that don't exist in schema", () => {
   const astSchema = buildASTSchema(
     parse(`

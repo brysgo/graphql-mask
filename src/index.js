@@ -107,6 +107,9 @@ function maskQuery(astSchema, query) {
 }
 
 function maskVariables(astSchema, maskedQuery, variables) {
+  if (!maskedQuery) {
+    return null;
+  }
   if (!variables) {
     return variables;
   }
