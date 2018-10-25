@@ -5,9 +5,9 @@ var graphqlLanguage = require("graphql/language"),
   print = graphqlLanguage.print;
 
 var graphqlType = require("graphql/type"),
-  GraphQLList = graphqlType.GraphQLList,
   GraphQLNonNull = graphqlType.GraphQLNonNull,
-  isInputObjectType = graphqlType.isInputObjectType;
+  isInputObjectType = graphqlType.isInputObjectType,
+  isListType = graphqlType.isListType;
 
 var graphqlUtilities = require("graphql/utilities"),
   buildASTSchema = graphqlUtilities.buildASTSchema,
@@ -22,18 +22,15 @@ function isBlank(str) {
   return !str || /^\s*$/.test(str);
 }
 
-function resolveType(type) {
+function resolveNonNullType(type) {
   if (!type) {
     return type;
   }
-  var innerType = type;
-  while (
-    innerType instanceof GraphQLNonNull ||
-    innerType instanceof GraphQLList
-  ) {
-    innerType = innerType.ofType;
+  if (type instanceof GraphQLNonNull) {
+    return type.ofType;
+  } else {
+    return type;
   }
-  return innerType;
 }
 
 module.exports = function graphqlMask(argsOrSchema, deprecatedQuery) {
@@ -125,35 +122,36 @@ function maskVariables(astSchema, maskedQuery, variables) {
   }
   variableDefinitions.forEach(function(varDefNode) {
     var varName = varDefNode.variable.name.value;
-    var varType = resolveType(typeFromAST(astSchema, varDefNode.type));
+    var varType = typeFromAST(astSchema, varDefNode.type);
     var varValue = variables[varName];
     maskedVariables[varName] = maskVariable(astSchema, varValue, varType);
   });
   return maskedVariables;
 }
 
-function maskVariable(astSchema, variable, variableType) {
+function maskVariable(astSchema, variable, incomingType) {
+  var variableType = resolveNonNullType(incomingType);
+  if (isListType(variableType)) {
+    return variable.map(function(v) {
+      return maskVariable(astSchema, v, variableType.ofType);
+    });
+  }
   if (!isInputObjectType(variableType)) {
     return variable;
   }
   var maskedVariable = {};
-  var varFields = variableType.getFields();
+  var typeFields = variableType.getFields();
   // Ensure every provided field is defined.
-  for (var fieldName in variable) {
-    if (Object.prototype.hasOwnProperty.call(variable, fieldName)) {
-      if (varFields[fieldName]) {
-        var fieldType = resolveType(
-          astSchema.getType(varFields[fieldName].type)
-        );
-        if (isInputObjectType(fieldType)) {
-          maskedVariable[fieldName] = maskVariable(
-            astSchema,
-            variable[fieldName],
-            fieldType
-          );
-        } else {
-          maskedVariable[fieldName] = variable[fieldName];
-        }
+  for (var varField in variable) {
+    if (Object.prototype.hasOwnProperty.call(variable, varField)) {
+      if (typeFields[varField]) {
+        var varValue = variable[varField];
+        // getType resolved to 'undefined' for lists, so we either resolve
+        // the type, or feed the raw list type back in for another recursion
+        var fieldType =
+          astSchema.getType(typeFields[varField].type) ||
+          typeFields[varField].type;
+        maskedVariable[varField] = maskVariable(astSchema, varValue, fieldType);
       }
     }
   }

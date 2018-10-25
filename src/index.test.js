@@ -573,6 +573,118 @@ test("remove variable properties from nested input types that don't exist in sch
   expect(maskedVariables).toMatchSnapshot();
 });
 
+test("remove variable properties from input type list that don't exist in schema", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      input UserInput {
+        name: String
+        address: AddressInput
+        phoneNumbers: [PhoneInput]
+      }
+
+      input AddressInput {
+        city: String
+      }
+
+      input PhoneInput {
+        number: String
+      }
+
+      type Mutation {
+        addUserAndAddress(user: UserInput): Boolean
+      }
+    `)
+  );
+  const { maskedVariables } = graphqlMask({
+    schema: astSchema,
+    query: `
+        mutation appMutation($user: UserInput) {
+          addUserAndAddress(user: $user) 
+        }
+      `,
+    variables: {
+      user: {
+        name: "Steve",
+        age: 33,
+        address: {
+          city: "Kitchener"
+        },
+        phoneNumbers: [
+          {
+            number: "555-555-5555",
+            type: "Home"
+          },
+          {
+            number: "222-222-2222",
+            type: "Mobile"
+          }
+        ]
+      }
+    }
+  });
+  expect(maskedVariables).toMatchSnapshot();
+});
+
+test("removing variable properties from input type list doesn't affect scalar lists", () => {
+  const astSchema = buildASTSchema(
+    parse(`
+      type Query {
+        foo: String
+      }
+
+      input UserInput {
+        name: String
+        address: AddressInput
+        phoneNumbers: [PhoneInput]
+        emails: [String]
+      }
+
+      input AddressInput {
+        city: String
+      }
+
+      input PhoneInput {
+        number: String
+      }
+
+      type Mutation {
+        addUserAndAddress(user: UserInput): Boolean
+      }
+    `)
+  );
+  const { maskedVariables } = graphqlMask({
+    schema: astSchema,
+    query: `
+        mutation appMutation($user: UserInput) {
+          addUserAndAddress(user: $user) 
+        }
+      `,
+    variables: {
+      user: {
+        name: "Steve",
+        age: 33,
+        address: {
+          city: "Kitchener"
+        },
+        phoneNumbers: [
+          {
+            number: "555-555-5555"
+          },
+          {
+            number: "222-222-2222"
+          }
+        ],
+        emails: ["test@example.com", "test1@example.com"]
+      }
+    }
+  });
+  expect(maskedVariables).toMatchSnapshot();
+});
+
 test("remove variable properties from multiple and nested input types that don't exist in schema", () => {
   const astSchema = buildASTSchema(
     parse(`
