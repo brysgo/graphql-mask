@@ -53,6 +53,25 @@ exports[`passing a string schema instead of a parsed one 1`] = `
 "
 `;
 
+exports[`remove variable properties from input type list that don't exist in schema 1`] = `
+Object {
+  "user": Object {
+    "address": Object {
+      "city": "Kitchener",
+    },
+    "name": "Steve",
+    "phoneNumbers": Array [
+      Object {
+        "number": "555-555-5555",
+      },
+      Object {
+        "number": "222-222-2222",
+      },
+    ],
+  },
+}
+`;
+
 exports[`remove variable properties from multiple and nested input types that don't exist in schema 1`] = `
 Object {
   "employer": Object {
@@ -144,6 +163,29 @@ Object {
     "data": Object {
       "baz": "Hello",
     },
+  },
+}
+`;
+
+exports[`removing variable properties from input type list doesn't affect scalar lists 1`] = `
+Object {
+  "user": Object {
+    "address": Object {
+      "city": "Kitchener",
+    },
+    "emails": Array [
+      "test@example.com",
+      "test1@example.com",
+    ],
+    "name": "Steve",
+    "phoneNumbers": Array [
+      Object {
+        "number": "555-555-5555",
+      },
+      Object {
+        "number": "222-222-2222",
+      },
+    ],
   },
 }
 `;
