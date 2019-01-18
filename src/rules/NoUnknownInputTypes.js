@@ -1,4 +1,4 @@
-var _error = require('graphql/error');
+var _error = require("graphql/error");
 
 function noUnknownInputTypeMessage(operationName, inputType) {
   return `${operationName} has unknown input type: ${inputType}`;
@@ -21,17 +21,17 @@ function NoUnknownInputTypes(context) {
               context.reportError(
                 new _error.GraphQLError(
                   noUnknownInputTypeMessage(
-                    node.name ? node.name.value : 'unknown',
-                    type,
+                    node.name ? node.name.value : "unknown",
+                    type
                   ),
-                  [node],
-                ),
+                  [node]
+                )
               );
             }
           }
         });
       }
-    },
+    }
   };
 }
 
