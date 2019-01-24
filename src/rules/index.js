@@ -3,7 +3,6 @@ var validation = require("graphql/validation"),
 
 module.exports = [].concat.apply(
   [
-    require("./NoEmptySelections"),
     require("./UnsupportedOperation"),
     require("./NoUnknownInputTypes")
   ],
