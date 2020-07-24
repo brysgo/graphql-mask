@@ -1,20 +1,36 @@
-name: Test
-
+name: CI
 on:
   push:
     branches:
-      - master
+    - master
   pull_request:
     branches:
-      - master
-
+    - master
 jobs:
-  build:
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
         with:
-          node-version: 12
+          node-version: '14'
       - run: yarn
       - run: yarn test
+  publish:
+    name: Publish
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2-beta
+      with:
+        node-version: '14'
+    - name: Build
+      run: yarn install --frozen-lockfile
+    - name: Publish
+      uses: mikeal/merge-release@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
