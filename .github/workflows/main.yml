@@ -76,35 +76,35 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-  publish-gpr:
-    name: Publish GPR
-    needs: version-bump
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
-        with:
-          node-version: "14"
-          registry-url: "https://npm.pkg.github.com"
-      - name: Cache node_modules
-        id: cache-modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: 14-${{ runner.OS }}-build-${{ hashFiles('package.json') }}
-      - name: Cache package.json
-        id: cache-package-json
-        uses: actions/cache@v2
-        with:
-          path: package.json
-          key: ${{ github.sha }}-package-json
-      - name: Install
-        if: steps.cache-modules.outputs.cache-hit != 'true'
-        run: yarn install --frozen-lockfile
-      - name: Build
-        run: yarn build
-      - name: GPR Publish
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # publish-gpr:
+  #   name: Publish GPR
+  #   needs: version-bump
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-node@v2-beta
+  #       with:
+  #         node-version: "14"
+  #         registry-url: "https://npm.pkg.github.com"
+  #     - name: Cache node_modules
+  #       id: cache-modules
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: node_modules
+  #         key: 14-${{ runner.OS }}-build-${{ hashFiles('package.json') }}
+  #     - name: Cache package.json
+  #       id: cache-package-json
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: package.json
+  #         key: ${{ github.sha }}-package-json
+  #     - name: Install
+  #       if: steps.cache-modules.outputs.cache-hit != 'true'
+  #       run: yarn install --frozen-lockfile
+  #     - name: Build
+  #       run: yarn build
+  #     - name: GPR Publish
+  #       run: npm publish
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
