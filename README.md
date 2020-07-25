@@ -1,8 +1,6 @@
 # graphql-mask
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/brysgo/graphql-mask.svg)](https://greenkeeper.io/)
-
-[![CircleCI][build-badge]][build]
+![CI](https://github.com/brysgo/graphql-mask/workflows/CI/badge.svg)
 [![npm package][npm-badge]][npm]
 [![npm downloads][npm-downloads-badge]][npm]
 
