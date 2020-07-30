@@ -16,7 +16,7 @@
     "@babel/cli": "^7.10.5",
     "@babel/preset-env": "^7.10.4",
     "graphql": "^15.3.0",
-    "jest-cli": "^26.1.0",
+    "jest-cli": "^26.2.1",
     "rimraf": "^3.0.0",
     "uglify-js": "^3.10.0"
   },
