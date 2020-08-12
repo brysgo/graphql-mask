@@ -1,6 +1,6 @@
 {
   "name": "graphql-mask",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "GraphQL Mask lets you subtract everything outside a schema from a query",
   "main": "src/index.js",
   "scripts": {
